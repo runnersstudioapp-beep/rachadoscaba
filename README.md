@@ -18,6 +18,7 @@ docs/                  o app (é isso que vai ao ar)
 banco/                 SQL do Supabase, em ordem
   001-esquema.sql      tabelas, regras de acesso e funções (rodar UMA vez)
   002-primeiro-admin-e-racha.sql
+  003-perfil-proprio-e-cadastro-com-nome.sql
 .vscode/               configurações do VS Code
 ```
 
@@ -39,6 +40,8 @@ banco/                 SQL do Supabase, em ordem
 - O `001-esquema.sql` **já foi aplicado** no projeto. **Não rode de novo** (dá erro "already exists").
 - Mudanças futuras: crie arquivos novos (`003-...sql`, `004-...sql`) só com a alteração
   e rode-os no SQL Editor do Supabase. Mantenha-os aqui para ter o histórico.
+- Para aplicar a escolha do nome no cadastro e a edição do perfil, rode também
+  `003-perfil-proprio-e-cadastro-com-nome.sql` no SQL Editor do Supabase.
 - Supabase: Authentication → Providers → Email → **desligar "Confirm email"**.
 - Recomendado: ativar a extensão `pg_cron` (Database → Extensions) e agendar a criação do racha de segunda:
   `select cron.schedule('racha-semanal','0 6 * * *','select public.criar_racha_semanal()');`

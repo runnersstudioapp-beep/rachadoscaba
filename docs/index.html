@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#050913">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Racha">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Racha da Segunda</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@500;600&display=swap">
+<style>
+:root{--bg:#050913;--cyan:#46d4ff;--ice:#e8f1ff;--gold:#f5c54a;--dim:#7f92b8;--red:#ff7a8a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ice);font:500 15px/1.4 Barlow,system-ui,sans-serif;background-image:radial-gradient(120% 60% at 50% -10%,#14357a 0,transparent 60%),repeating-linear-gradient(115deg,rgba(70,212,255,.04) 0 2px,transparent 2px 22px)}
+.wrap{max-width:520px;margin:0 auto;padding:0 14px 110px}
+h1,h2,.num{font-family:"Barlow Condensed",system-ui,sans-serif;margin:0}
+.top{margin:0 -14px 14px;padding:16px 22px 24px;background:linear-gradient(100deg,#0a1a3d,#143a8f 62%,#46d4ff 130%);clip-path:polygon(0 0,100% 0,100% 80%,93% 100%,0 100%);position:relative}
+.top h1{font-size:34px;font-weight:800;line-height:1}.top small{color:#bcd6ff;font-size:13px}
+#out{position:absolute;right:14px;top:12px}
+body.auth #out,body.auth nav{display:none}
+.panel{background:linear-gradient(180deg,rgba(20,58,143,.35),rgba(12,31,69,.5));padding:14px 16px;margin:0 0 12px;clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);border-top:2px solid var(--cyan)}
+.panel h2{font-size:22px;font-weight:700;margin-bottom:6px}
+.big{font-size:44px;font-weight:800;line-height:1;font-family:"Barlow Condensed",sans-serif}
+.sub{color:var(--dim);font-size:13px}.err{color:var(--red);font-weight:600}
+.btn{font:700 18px "Barlow Condensed",sans-serif;background:linear-gradient(180deg,#6fe0ff,#1d5cff);color:#04122e;border:0;padding:13px 26px;cursor:pointer;clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);min-height:48px}
+.btn.ghost{background:#16294f;color:var(--ice)}.btn.sm{font-size:15px;padding:8px 14px;min-height:38px}.btn[disabled]{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input:not([type=checkbox]),select{font:600 16px Barlow,sans-serif;background:#16294f;color:var(--ice);border:0;padding:10px;min-height:44px;max-width:100%}
+label{display:block;margin:10px 0;font-weight:600;color:#bcd6ff}label input,label select{display:block;width:100%;margin-top:4px}
+.ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.step,.x{border:0;background:#16294f;color:var(--ice);font-size:18px;cursor:pointer;width:36px;height:36px}.x{width:28px;height:28px;margin-left:6px;font-size:16px}
+.row{display:grid;grid-template-columns:32px 1fr auto;gap:4px 10px;align-items:center;padding:9px 18px 9px 12px;margin:4px 0;background:linear-gradient(90deg,rgba(29,92,255,.3),rgba(12,31,69,.6));clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);border-left:3px solid var(--cyan)}
+.row.sup{border-left-color:var(--dim);background:linear-gradient(90deg,rgba(60,75,110,.35),rgba(12,20,40,.6))}.row.me{border-left-color:var(--gold)}.row.off{opacity:.5}
+.row .rest{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pos{font:700 13px "Barlow Condensed";background:#0a1630;color:var(--cyan);padding:2px 7px;margin-left:6px}
+.name{font:700 20px "Barlow Condensed";letter-spacing:.3px}.num{font-weight:700;font-size:22px;color:var(--cyan)}
+.time{font:600 13px ui-monospace,Menlo,monospace;color:#bcd6ff}
+.st{font-size:16px;letter-spacing:1px;background:linear-gradient(90deg,var(--gold) calc(var(--v)*20%),#2b3a5e 0);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.sep{font:700 15px "Barlow Condensed";color:var(--dim);margin:14px 0 4px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;background:linear-gradient(180deg,rgba(5,9,19,.6),#050913 40%);padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px))}
+nav .in{display:flex;gap:6px;width:100%;max-width:520px}
+nav button{flex:1;font:700 18px "Barlow Condensed";background:#0e2252;color:var(--dim);border:0;padding:12px 4px;min-height:48px;cursor:pointer;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+nav button[aria-current=page]{background:linear-gradient(180deg,#6fe0ff,#1d5cff);color:#04122e}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:10px}.team{background:rgba(12,31,69,.7);padding:10px 12px;border-top:3px solid var(--cyan)}.team.b{border-top-color:var(--gold)}.team h2{font-size:20px}.team div{padding:3px 0;border-bottom:1px solid rgba(127,146,184,.2)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ice);color:#04122e;font-weight:700;padding:10px 18px;z-index:9;max-width:90%;text-align:center}
+</style>
+</head>
+<body class="auth">
+<div class="wrap">
+  <header class="top"><button id="out" class="btn sm ghost" data-a="out">Sair</button><h1>Racha da Segunda</h1><small id="who">Segunda, 19:00 · Society 6x6</small></header>
+  <main id="app"></main>
+</div>
+<nav><div class="in" id="nav"></div></nav>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SB_URL='https://orypccfafnasydcotgrf.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXBjY2ZhZm5hc3lkY290Z3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MTAwOTQsImV4cCI6MjEwNzQ4NjA5NH0.e589SOFj1zY_ZsO4mFtFqK4ugQh6tCY4S6S-a1o6HIQ';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const $=s=>document.querySelector(s),TZ='America/Fortaleza',POS=['ZAG','LAT','VOL','MEI','ATA'];
+const POSH=POS.map(x=>`<option>${x}</option>`).join('');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tok=(()=>{try{let t=localStorage.getItem('racha_tok');if(!t){t=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random();localStorage.setItem('racha_tok',t)}return t}catch(e){return 'tmp-'+Math.random()}})();
+const S={tab:'lista',rachas:[],sel:null,lista:[],sorteio:null,jogs:[],adm:null,last:null,me:null};
+const D=s=>new Date(String(s).replace(/(\.\d{3})\d+/,'$1'));
+const fd=s=>new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(D(s));
+const ft=s=>new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3,hour12:false}).format(D(s)).replace(',','.');
+const st=v=>`<span class="st" style="--v:${Math.round(v*2)/2}" title="${Number(v).toFixed(1)} estrelas">★★★★★</span>`;
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2600)}
+async function call(fn,args,ok){const{data,error}=await sb.rpc(fn,args);if(error){toast(error.message);return null}if(ok)toast(ok);return data===null?true:data}
+const tr=m=>/Invalid login/i.test(m)?'E-mail ou senha incorretos.':/already registered/i.test(m)?'Este e-mail já tem conta. Use "Já tenho conta".':/at least 6/i.test(m)?'A senha precisa ter pelo menos 6 caracteres.':m;
+
+/* ---------- telas de acesso ---------- */
+const convForm=()=>`<label>Código do convite<input id="c" autocapitalize="characters" autocomplete="off"></label><label>Idade<input id="i" type="number" inputmode="numeric" min="10" max="90"></label><label>Posição preferida<select id="pos">${POSH}</select></label>`;
+function authView(mode,msg){document.body.classList.add('auth');const c=mode==='criar';
+ $('#app').innerHTML=`<section class="panel"><h2>${c?'Criar conta com convite':'Entrar'}</h2>${msg?`<p class="err" role="alert">${esc(msg)}</p>`:''}<label>E-mail<input id="e" type="email" autocomplete="email"></label><label>Senha<input id="p" type="password" autocomplete="${c?'new-password':'current-password'}"></label>${c?convForm():''}<div class="ctl" style="gap:10px"><button class="btn" data-a="${c?'signup':'signin'}">${c?'Criar conta':'Entrar'}</button><button class="btn ghost" data-a="${c?'tologin':'tosignup'}">${c?'Já tenho conta':'Tenho um convite'}</button></div></section>`}
+function convView(msg){document.body.classList.add('auth');
+ $('#app').innerHTML=`<section class="panel"><h2>Falta o convite</h2><p class="sub">Sua conta ainda não está ligada a um jogador. Informe o código que o admin te passou.</p>${msg?`<p class="err" role="alert">${esc(msg)}</p>`:''}${convForm()}<div class="ctl" style="gap:10px"><button class="btn" data-a="redeem">Vincular</button><button class="btn ghost" data-a="out">Sair</button></div></section>`}
+
+/* ---------- dados ---------- */
+async function init(){
+ const{data:{session}}=await sb.auth.getSession();if(!session)return authView('entrar');
+ const{data:me}=await sb.from('jogadores').select('*').eq('auth_id',session.user.id).maybeSingle();
+ if(!me)return convView();
+ if(me.banido){await sb.auth.signOut();return authView('entrar','Seu acesso está bloqueado. Fale com um admin.')}
+ S.me=me;document.body.classList.remove('auth');
+ await sb.rpc('registrar_sessao',{p_token:tok});
+ await refresh();render();
+}
+async function refresh(){
+ const lim=new Date(Date.now()-3*36e5).toISOString();
+ const[r,j]=await Promise.all([sb.from('rachas').select('*').eq('cancelado',false).gte('inicio',lim).order('inicio'),sb.from('jogadores_publicos').select('*').order('estrelas',{ascending:false})]);
+ S.rachas=r.data||[];S.jogs=j.data||[];
+ if(!S.rachas.find(x=>x.id===S.sel))S.sel=S.rachas[0]?.id||null;
+ await loadLista();if(S.me.is_admin&&S.tab==='admin')await loadAdm();
+}
+async function loadLista(){
+ if(!S.sel){S.lista=[];S.sorteio=null;return}
+ const[l,s]=await Promise.all([sb.from('lista_racha').select('*').eq('racha_id',S.sel).order('vaga'),sb.from('sorteios').select('*').eq('racha_id',S.sel).order('criado_em',{ascending:false}).limit(1)]);
+ S.lista=l.data||[];S.sorteio=s.data?.[0]||null;
+}
+async function loadAdm(){
+ const[j,n]=await Promise.all([sb.from('jogadores').select('*').order('nome'),sb.from('notas').select('jogador_id,valor').eq('admin_id',S.me.id)]);
+ S.adm={jogs:j.data||[],notas:Object.fromEntries((n.data||[]).map(x=>[x.jogador_id,Number(x.valor)]))};
+}
+
+/* ---------- views ---------- */
+const rw=(x,s)=>`<div class="row${s?' sup':''}${x.jogador_id===S.me.id?' me':''}"><span class="num">${x.vaga}</span><span><span class="name">${esc(x.nome)}</span><span class="pos">${x.posicao||''}</span>${x.garantida?' <span class="sub">puxou o racha</span>':''}</span>${st(x.estrelas)}<span class="rest"><span class="sub">Entrou às</span><span class="time">${ft(x.entrou_em)}${S.me.is_admin?`<button class="x" aria-label="Remover ${esc(x.nome)}" data-a="rm" data-id="${x.jogador_id}">×</button>`:''}</span></span></div>`;
+function sorteioHtml(){const s=S.sorteio;if(!s)return '';const nm=id=>esc(S.jogs.find(j=>j.id===id)?.nome||'?');
+ const bx=(t,a,k,n)=>`<div class="team ${k}"><h2>${n} · ${Number(t).toFixed(1)}</h2>${a.map(i=>`<div>${nm(i)}</div>`).join('')}</div>`;
+ return `<div class="sep">Times sorteados</div><div class="teams">${bx(s.soma_a,s.time_a,'','Time A')}${bx(s.soma_b,s.time_b,'b','Time B')}</div>`}
+function bLista(r){
+ const eu=S.lista.find(x=>x.jogador_id===S.me.id),aberta=Date.now()>=D(r.abre_em).getTime(),tit=S.lista.filter(x=>x.titular),sup=S.lista.filter(x=>!x.titular),adm=S.me.is_admin;
+ return `<section class="panel"><div class="big">${tit.length}<span class="sub"> / ${r.vagas} titulares</span></div><p class="sub">${aberta?'Lista aberta.':`A lista abre ${fd(r.abre_em)}.`} Do ${r.vagas+1}º em diante, só entra se um titular sair.</p><div class="ctl" style="gap:10px">${eu?'<button class="btn ghost" data-a="sai">Sair da lista</button>':`<button class="btn" data-a="ent" ${aberta?'':'disabled'}>${aberta?'Entrar na lista':'Aguardando abertura'}</button>`}<button class="btn ghost" data-a="zap">Compartilhar</button>${adm?'<button class="btn sm ghost" data-a="sort">Sortear times</button><button class="btn sm ghost" data-a="cancel">Cancelar racha</button>':''}</div></section>${tit.length?'<div class="sep">Titulares</div>'+tit.map(x=>rw(x)).join(''):''}${sup.length?'<div class="sep">Suplentes</div>'+sup.map(x=>rw(x,1)).join(''):''}${sorteioHtml()}`}
+function vLista(){
+ const r=S.rachas.find(x=>x.id===S.sel);
+ if(!r)return '<section class="panel"><h2>Nenhum racha marcado</h2><p class="sub">O racha de segunda aparece aqui. Você também pode puxar um em outro dia.</p></section>';
+ return `<section class="panel"><h2>Racha</h2><select id="rs" data-ch="rs" aria-label="Escolher racha">${S.rachas.map(x=>`<option value="${x.id}" ${x.id===S.sel?'selected':''}>${fd(x.inicio)}</option>`).join('')}</select></section><div id="lb">${bLista(r)}</div>`}
+const vJogs=()=>`<section class="panel"><h2>Jogadores</h2><p class="sub">Ranking por estrelas, definido pelos admins.</p></section>`+S.jogs.map((q,i)=>`<div class="row${q.id===S.me.id?' me':''}"><span class="num">${i+1}</span><span><span class="name">${esc(q.nome)}</span><span class="pos">${q.posicao||'—'}</span></span>${st(q.estrelas)}</div>`).join('');
+function inicioPuxar(){const d=$('#pd')?.value,h=$('#ph')?.value;return d&&h?new Date(`${d}T${h}:00-03:00`):null}
+function pvTxt(){const g=inicioPuxar();if(!g)return '';if(g<=new Date())return 'Esse horário já passou.';const l=new Date(g-3*36e5),p=new Date(Date.UTC(l.getUTCFullYear(),l.getUTCMonth(),l.getUTCDate()-1,15));
+ return Date.now()>=p?'A lista abre agora e você já entra como 1º nome.':`A lista abre ${fd(p.toISOString())} e você disputa a vaga como todo mundo.`}
+const vPuxar=()=>`<section class="panel"><h2>Puxar um racha</h2><p class="sub">A lista abre às 12h do dia anterior. Se você puxar depois disso, ela abre na hora e sua vaga já fica garantida.</p><div class="ctl" style="gap:10px"><input id="pd" type="date" data-ch="pv" aria-label="Dia"><input id="ph" type="time" value="18:30" data-ch="pv" aria-label="Hora"><button class="btn" data-a="puxar">Puxar racha</button></div><p id="pv" class="sub" aria-live="polite"></p></section>`;
+function vAdmin(){
+ if(!S.adm)return '<p class="sub">Carregando…</p>';
+ const L=S.last?`<section class="panel"><h2>Convite de ${esc(S.last.n)}</h2><p>Código: <b class="time" style="font-size:20px">${esc(S.last.c)}</b></p><button class="btn sm" data-a="cp">Enviar no WhatsApp</button></section>`:'';
+ return L+`<section class="panel"><h2>Novo jogador</h2><div class="ctl" style="gap:10px"><input id="nn" placeholder="Nome" maxlength="40" aria-label="Nome"><select id="np" aria-label="Posição">${POSH}</select><button class="btn sm" data-a="newj">Criar convite</button></div></section>`+S.adm.jogs.map(j=>{
+  const m=S.adm.notas[j.id]??Math.round(j.estrelas*2)/2,eu=j.id===S.me.id;
+  return `<div class="row${j.banido?' off':''}"><span></span><span><span class="name">${esc(j.nome)}</span><span class="pos">${j.posicao||'—'}</span>${j.is_admin?' <span class="sub">admin</span>':''}${j.banido?' <span class="sub">banido</span>':''}</span>${st(j.estrelas)}<span class="rest">${j.auth_id?'':`<span class="sub">Convite: <b>${esc(j.convite)}</b></span>`}<span class="ctl"><button class="step" data-a="nota" data-id="${j.id}" data-v="${Math.max(.5,m-.5)}" aria-label="Diminuir minha nota de ${esc(j.nome)}">−</button><span class="sub">minha nota ${m.toFixed(1)}</span><button class="step" data-a="nota" data-id="${j.id}" data-v="${Math.min(5,m+.5)}" aria-label="Aumentar minha nota de ${esc(j.nome)}">+</button></span>${eu?'':`<span class="ctl"><button class="btn sm ghost" data-a="ban" data-id="${j.id}" data-v="${!j.banido}">${j.banido?'Desbanir':'Banir'}</button><button class="btn sm ghost" data-a="adm" data-id="${j.id}" data-v="${!j.is_admin}">${j.is_admin?'Tirar admin':'Admin'}</button><button class="btn sm ghost" data-a="conv" data-id="${j.id}">Novo convite</button></span>`}</span></div>`}).join('')}
+function render(){
+ const t=[['lista','Lista'],['jogadores','Jogadores'],['puxar','Puxar']];if(S.me.is_admin)t.push(['admin','Admin']);
+ $('#nav').innerHTML=t.map(x=>`<button ${x[0]===S.tab?'aria-current="page"':''} data-a="tab" data-id="${x[0]}">${x[1]}</button>`).join('');
+ $('#who').textContent=S.me.nome+(S.me.is_admin?' · admin':'');
+ $('#app').innerHTML={lista:vLista,jogadores:vJogs,puxar:vPuxar,admin:vAdmin}[S.tab]();
+}
+function paintLista(){const r=S.rachas.find(x=>x.id===S.sel),e=$('#lb');if(e&&r)e.innerHTML=bLista(r)}
+async function out(msg){await sb.auth.signOut();S.me=null;authView('entrar',msg)}
+const invite=(n,c)=>{S.last={n,c};render()};
+
+/* ---------- ações ---------- */
+const A={
+ tosignup:()=>authView('criar'),tologin:()=>authView('entrar'),
+ signin:async()=>{const{error}=await sb.auth.signInWithPassword({email:$('#e').value.trim(),password:$('#p').value});if(error)return authView('entrar',tr(error.message));init()},
+ signup:async()=>{if(!$('#c').value.trim())return authView('criar','Informe o código do convite.');
+  const{data,error}=await sb.auth.signUp({email:$('#e').value.trim(),password:$('#p').value});
+  if(error)return authView('criar',tr(error.message));
+  if(!data.session)return authView('entrar','Conta criada, mas o Supabase pede confirmação por e-mail. Desligue em Authentication > Providers > Email.');
+  A.redeem()},
+ redeem:async()=>{const{error}=await sb.rpc('resgatar_convite',{p_codigo:$('#c').value,p_idade:Number($('#i').value)||null,p_posicao:$('#pos').value});if(error)return convView(error.message);init()},
+ out:()=>out(),
+ tab:async id=>{S.tab=id;if(id==='admin')await loadAdm();render()},
+ ent:async()=>{await call('entrar_na_lista',{p_racha:S.sel,p_sessao:tok},'Nome adicionado');await loadLista();paintLista()},
+ sai:async()=>{if(!confirm('Tirar seu nome da lista?'))return;await call('sair_da_lista',{p_racha:S.sel,p_sessao:tok},'Você saiu da lista');await loadLista();paintLista()},
+ rm:async id=>{if(!confirm('Remover este jogador da lista?'))return;await call('admin_remover_da_lista',{p_racha:S.sel,p_jogador:id},'Removido');await loadLista();paintLista()},
+ sort:async()=>{await call('admin_sortear',{p_racha:S.sel},'Times sorteados');await loadLista();paintLista()},
+ cancel:async()=>{if(!confirm('Cancelar este racha?'))return;if(await call('admin_cancelar_racha',{p_racha:S.sel},'Racha cancelado')){await refresh();render()}},
+ zap:()=>{const r=S.rachas.find(x=>x.id===S.sel),n=x=>x.map(y=>`${y.vaga}. ${y.nome}`).join('\n'),t=S.lista.filter(x=>x.titular),s=S.lista.filter(x=>!x.titular);
+  open('https://wa.me/?text='+encodeURIComponent(`*Racha · ${fd(r.inicio)}*\n\n${n(t)}${s.length?'\n\n*Suplentes*\n'+n(s):''}`),'_blank')},
+ puxar:async()=>{const g=inicioPuxar();if(!g||g<=new Date())return toast('Escolha um dia e uma hora futuros');
+  const id=await call('puxar_racha',{p_inicio:g.toISOString(),p_sessao:tok},'Racha puxado');if(id&&id!==true){S.sel=id;S.tab='lista';await refresh();render()}},
+ newj:async()=>{const n=$('#nn').value.trim();if(!n)return toast('Digite o nome');const c=await call('admin_criar_jogador',{p_nome:n,p_posicao:$('#np').value});if(c&&c!==true){await loadAdm();invite(n,c)}},
+ conv:async id=>{const c=await call('admin_novo_convite',{p_jogador:id});if(c&&c!==true){await loadAdm();invite(S.adm.jogs.find(j=>j.id===id).nome,c)}},
+ nota:async(id,b)=>{if(await call('admin_dar_nota',{p_jogador:id,p_valor:Number(b.dataset.v)})){await loadAdm();await refresh();render()}},
+ ban:async(id,b)=>{if(await call('admin_banir',{p_jogador:id,p_banir:b.dataset.v==='true'})){await loadAdm();render()}},
+ adm:async(id,b)=>{if(await call('admin_promover',{p_jogador:id,p_admin:b.dataset.v==='true'})){await loadAdm();render()}},
+ cp:()=>open('https://wa.me/?text='+encodeURIComponent(`Convite do racha! Abra ${location.href.split('#')[0]}, toque em "Tenho um convite" e use o código ${S.last.c}.`),'_blank')
+};
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-a]');if(!b||!A[b.dataset.a])return;b.disabled=true;try{await A[b.dataset.a](b.dataset.id,b)}finally{b.disabled=false}});
+document.addEventListener('input',e=>{const c=e.target.dataset?.ch;if(c==='pv')$('#pv').textContent=pvTxt();if(c==='rs'){S.sel=e.target.value;loadLista().then(paintLista)}});
+
+/* ---------- atualização automática ---------- */
+let tk=0;
+setInterval(async()=>{if(!S.me||document.hidden)return;tk++;
+ const{data}=await sb.rpc('sessao_ativa',{p_token:tok});if(data===false)return out('Você entrou em outro aparelho. Entre de novo para continuar aqui.');
+ if(S.tab!=='lista')return;
+ if(tk%6===0){const sig=S.rachas.map(x=>x.id).join();await refresh();if(sig!==S.rachas.map(x=>x.id).join())return render()}else await loadLista();
+ paintLista()},4000);
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+init();
+</script>
+</body>
+</html>

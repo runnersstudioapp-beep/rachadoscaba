@@ -1,4 +1,4 @@
-# Racha da Segunda
+# Racha dos Caba
 
 App (PWA) para organizar o racha de futebol: lista de 12 titulares com abertura automática,
 suplentes, rachas puxados em outros dias, ranking por estrelas e sorteio equilibrado de times.
@@ -19,6 +19,7 @@ banco/                 SQL do Supabase, em ordem
   001-esquema.sql      tabelas, regras de acesso e funções (rodar UMA vez)
   002-primeiro-admin-e-racha.sql
   003-perfil-proprio-e-cadastro-com-nome.sql
+  004-log-trocas-aparelho.sql
 .vscode/               configurações do VS Code
 ```
 
@@ -42,6 +43,8 @@ banco/                 SQL do Supabase, em ordem
   e rode-os no SQL Editor do Supabase. Mantenha-os aqui para ter o histórico.
 - Para aplicar a escolha do nome no cadastro e a edição do perfil, rode também
   `003-perfil-proprio-e-cadastro-com-nome.sql` no SQL Editor do Supabase.
+- Para os admins consultarem as trocas recentes de aparelho com identificador local
+  da instalação e dados do navegador, rode também `004-log-trocas-aparelho.sql`.
 - Supabase: Authentication → Providers → Email → **desligar "Confirm email"**.
 - Recomendado: ativar a extensão `pg_cron` (Database → Extensions) e agendar a criação do racha de segunda:
   `select cron.schedule('racha-semanal','0 6 * * *','select public.criar_racha_semanal()');`

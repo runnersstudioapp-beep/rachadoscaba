@@ -7,12 +7,12 @@
 <meta name="theme-color" content="#050913">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Racha">
+<meta name="apple-mobile-web-app-title" content="Racha dos Caba">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
-<title>Racha da Segunda</title>
+<title>Racha dos Caba</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@500;600&display=swap">
 <style>
 :root{--bg:#050913;--cyan:#46d4ff;--ice:#e8f1ff;--gold:#f5c54a;--dim:#7f92b8;--red:#ff7a8a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
@@ -39,6 +39,12 @@ label{display:block;margin:10px 0;font-weight:600;color:#bcd6ff}label input,labe
 .row{display:grid;grid-template-columns:32px 1fr auto;gap:4px 10px;align-items:center;padding:9px 18px 9px 12px;margin:4px 0;background:linear-gradient(90deg,rgba(29,92,255,.3),rgba(12,31,69,.6));clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);border-left:3px solid var(--cyan)}
 .row.sup{border-left-color:var(--dim);background:linear-gradient(90deg,rgba(60,75,110,.35),rgba(12,20,40,.6))}.row.me{border-left-color:var(--gold)}.row.off{opacity:.5}
 .row .rest{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.session-entry{min-width:0;padding:10px 12px;margin:6px 0;background:rgba(12,31,69,.72);border-left:3px solid var(--cyan)}
+.session-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.session-date{font:600 13px ui-monospace,Menlo,monospace;color:#bcd6ff;white-space:nowrap}
+.session-details{display:grid;gap:4px;margin-top:5px;font-size:13px}
+.session-install{color:var(--cyan);font-weight:600}
+.session-agent{color:var(--dim);overflow-wrap:anywhere;word-break:break-word}
 .pos{font:700 13px "Barlow Condensed";background:#0a1630;color:var(--cyan);padding:2px 7px;margin-left:6px}
 .name{font:700 20px "Barlow Condensed";letter-spacing:.3px}.num{font-weight:700;font-size:22px;color:var(--cyan)}
 .time{font:600 13px ui-monospace,Menlo,monospace;color:#bcd6ff}
@@ -54,7 +60,7 @@ nav button[aria-current=page]{background:linear-gradient(180deg,#6fe0ff,#1d5cff)
 </head>
 <body class="auth">
 <div class="wrap">
-  <header class="top"><button id="out" class="btn sm ghost" data-a="out">Sair</button><h1>Racha da Segunda</h1><small id="who">Segunda, 19:00 · Society 6x6</small></header>
+  <header class="top"><button id="out" class="btn sm ghost" data-a="out">Sair</button><h1>Racha dos Caba</h1><small id="who">Segunda, 19:00 · Society 6x6</small></header>
   <main id="app"></main>
 </div>
 <nav><div class="in" id="nav"></div></nav>
@@ -130,7 +136,7 @@ function pvTxt(){const g=inicioPuxar();if(!g)return '';if(g<=new Date())return '
 const vPuxar=()=>`<section class="panel"><h2>Puxar um racha</h2><p class="sub">A lista abre às 12h do dia anterior. Se você puxar depois disso, ela abre na hora e sua vaga já fica garantida.</p><div class="ctl" style="gap:10px"><input id="pd" type="date" data-ch="pv" aria-label="Dia"><input id="ph" type="time" value="18:30" data-ch="pv" aria-label="Hora"><button class="btn" data-a="puxar">Puxar racha</button></div><p id="pv" class="sub" aria-live="polite"></p></section>`;
 function vAdmin(){
  if(!S.adm)return '<p class="sub">Carregando…</p>';
- const logs=S.sessLogError?`<p class="err">${esc(S.sessLogError)}</p>`:S.sessLogs.length?S.sessLogs.map(x=>`<div class="row"><span class="sub">${ft(x.em)}</span><span><span class="name">${esc(x.jogadores?.nome||'Jogador removido')}</span><span class="pos">Instalação …${esc((x.instalacao_id||'').slice(-8))}</span><span class="sub">${esc(x.user_agent||'Dados da instalação não disponíveis')}</span></span></div>`).join(''):'<p class="sub">Nenhuma troca registrada.</p>';
+ const logs=S.sessLogError?`<p class="err">${esc(S.sessLogError)}</p>`:S.sessLogs.length?S.sessLogs.map(x=>`<article class="session-entry"><div class="session-head"><span class="name">${esc(x.jogadores?.nome||'Jogador removido')}</span><time class="session-date">${fd(x.em)}</time></div><div class="session-details"><span class="session-install">Instalação …${esc((x.instalacao_id||'').slice(-8))}</span><span class="session-agent">${esc(x.user_agent||'Dados da instalação não disponíveis')}</span></div></article>`).join(''):'<p class="sub">Nenhuma troca registrada.</p>';
  const L=S.last?`<section class="panel"><h2>Convite de ${esc(S.last.n)}</h2><p>Código: <b class="time" style="font-size:20px">${esc(S.last.c)}</b></p><button class="btn sm" data-a="cp">Enviar no WhatsApp</button></section>`:'';
   return L+`<section class="panel"><h2>Novo jogador</h2><div class="ctl" style="gap:10px"><input id="nn" placeholder="Nome" maxlength="40" aria-label="Nome"><select id="np" aria-label="Posição">${POSH}</select><button class="btn sm" data-a="newj">Criar convite</button></div></section><section class="panel"><h2>Trocas de aparelho</h2><p class="sub">Até 100 acessos recentes que substituíram uma sessão ativa. O identificador é local à instalação e pode mudar se os dados do navegador forem apagados.</p>${logs}</section>`+S.adm.jogs.map(j=>{
   const m=S.adm.notas[j.id]??Math.round(j.estrelas*2)/2,eu=j.id===S.me.id;

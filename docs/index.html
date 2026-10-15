@@ -45,6 +45,8 @@ label{display:block;margin:10px 0;font-weight:600;color:#bcd6ff}label input,labe
 .session-details{display:grid;gap:4px;margin-top:5px;font-size:13px}
 .session-install{color:var(--cyan);font-weight:600}
 .session-agent{color:var(--dim);overflow-wrap:anywhere;word-break:break-word}
+details.guest-picker{margin-top:10px}
+details.guest-picker summary{cursor:pointer;font:700 18px "Barlow Condensed";color:var(--cyan)}
 .pos{font:700 13px "Barlow Condensed";background:#0a1630;color:var(--cyan);padding:2px 7px;margin-left:6px}
 .name{font:700 20px "Barlow Condensed";letter-spacing:.3px}.num{font-weight:700;font-size:22px;color:var(--cyan)}
 .time{font:600 13px ui-monospace,Menlo,monospace;color:#bcd6ff}
@@ -75,7 +77,7 @@ const $=s=>document.querySelector(s),TZ='America/Fortaleza',POS=['ZAG','LAT','VO
 const POSH=POS.map(x=>`<option>${x}</option>`).join('');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tok=(()=>{try{let t=localStorage.getItem('racha_tok');if(!t){t=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random();localStorage.setItem('racha_tok',t)}return t}catch(e){return 'tmp-'+Math.random()}})();
-const S={tab:'lista',rachas:[],sel:null,lista:[],sorteio:null,jogs:[],adm:null,sessLogs:[],sessLogError:'',last:null,me:null,email:''};
+const S={tab:'lista',rachas:[],sel:null,lista:[],sorteio:null,jogs:[],adm:null,sessLogs:[],sessLogError:'',extraAdicionado:false,extraError:'',last:null,me:null,email:''};
 const D=s=>new Date(String(s).replace(/(\.\d{3})\d+/,'$1'));
 const fd=s=>new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(D(s));
 const ft=s=>new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3,hour12:false}).format(D(s)).replace(',','.');
@@ -110,9 +112,9 @@ async function refresh(){
  await loadLista();if(S.me.is_admin&&S.tab==='admin')await loadAdm();
 }
 async function loadLista(){
- if(!S.sel){S.lista=[];S.sorteio=null;return}
- const[l,s]=await Promise.all([sb.from('lista_racha').select('*').eq('racha_id',S.sel).order('vaga'),sb.from('sorteios').select('*').eq('racha_id',S.sel).order('criado_em',{ascending:false}).limit(1)]);
- S.lista=l.data||[];S.sorteio=s.data?.[0]||null;
+ if(!S.sel){S.lista=[];S.sorteio=null;S.extraAdicionado=false;S.extraError='';return}
+ const[l,s,e]=await Promise.all([sb.from('lista_racha').select('*').eq('racha_id',S.sel).order('vaga'),sb.from('sorteios').select('*').eq('racha_id',S.sel).order('criado_em',{ascending:false}).limit(1),sb.from('inscricoes').select('jogador_id').eq('racha_id',S.sel).eq('adicionado_por',S.me.id).is('saiu_em',null).limit(1).maybeSingle()]);
+ S.lista=l.data||[];S.sorteio=s.data?.[0]||null;S.extraAdicionado=!!e.data;S.extraError=e.error?'Não foi possível verificar a inclusão extra. Rode a migração 005 no banco.':'';
 }
 async function loadAdm(){
  const[j,n,l]=await Promise.all([sb.from('jogadores').select('*').order('nome'),sb.from('notas').select('jogador_id,valor').eq('admin_id',S.me.id),sb.from('sessoes_log').select('id,jogador_id,em,instalacao_id,user_agent,jogadores(nome)').order('em',{ascending:false}).limit(100)]);
@@ -126,7 +128,9 @@ function sorteioHtml(){const s=S.sorteio;if(!s)return '';const nm=id=>esc(S.jogs
  return `<div class="sep">Times sorteados</div><div class="teams">${bx(s.soma_a,s.time_a,'','Time A')}${bx(s.soma_b,s.time_b,'b','Time B')}</div>`}
 function bLista(r){
  const eu=S.lista.find(x=>x.jogador_id===S.me.id),aberta=Date.now()>=D(r.abre_em).getTime(),tit=S.lista.filter(x=>x.titular),sup=S.lista.filter(x=>!x.titular),adm=S.me.is_admin;
- return `<section class="panel"><div class="big">${tit.length}<span class="sub"> / ${r.vagas} titulares</span></div><p class="sub">${aberta?'Lista aberta.':`A lista abre ${fd(r.abre_em)}.`} Do ${r.vagas+1}º em diante, só entra se um titular sair.</p><div class="ctl" style="gap:10px">${eu?'<button class="btn ghost" data-a="sai">Sair da lista</button>':`<button class="btn" data-a="ent" ${aberta?'':'disabled'}>${aberta?'Entrar na lista':'Aguardando abertura'}</button>`}<button class="btn ghost" data-a="zap">Compartilhar</button>${adm?'<button class="btn sm ghost" data-a="sort">Sortear times</button><button class="btn sm ghost" data-a="cancel">Cancelar racha</button>':''}</div></section>${tit.length?'<div class="sep">Titulares</div>'+tit.map(x=>rw(x)).join(''):''}${sup.length?'<div class="sep">Suplentes</div>'+sup.map(x=>rw(x,1)).join(''):''}${sorteioHtml()}`}
+ const extraAtivo=S.lista.find(x=>x.adicionado_por===S.me.id);
+ const controlesExtra=r.semanal||!aberta?'':S.extraError?`<p class="err" role="alert">${esc(S.extraError)}</p>`:S.extraAdicionado?(extraAtivo?`<p class="sub">Jogador extra: ${esc(extraAtivo.nome)} <button class="btn sm ghost" data-a="removeExtra" data-id="${extraAtivo.jogador_id}">Remover</button></p>`:'<p class="sub">Você já usou sua inclusão extra neste racha; ela não pode ser substituída.</p>'):eu?`<details class="panel guest-picker"><summary>Adicionar 1 jogador</summary><p class="sub">Escolha alguém do grupo. A pessoa entra no fim da fila e ocupa uma vaga.</p><div class="ctl"><select id="extra-player" aria-label="Jogador extra"><option value="">${S.jogs.some(j=>j.id!==S.me.id&&!S.lista.some(x=>x.jogador_id===j.id))?'Selecione o jogador':'Todos já estão na lista'}</option>${S.jogs.filter(j=>j.id!==S.me.id&&!S.lista.some(x=>x.jogador_id===j.id)).map(j=>`<option value="${j.id}">${esc(j.nome)}</option>`).join('')}</select><button class="btn sm" data-a="addExtra" ${S.jogs.some(j=>j.id!==S.me.id&&!S.lista.some(x=>x.jogador_id===j.id))?'':'disabled'}>Adicionar</button></div></details>`:'';
+ return `<section class="panel"><div class="big">${tit.length}<span class="sub"> / ${r.vagas} titulares</span></div><p class="sub">${aberta?'Lista aberta.':`A lista abre ${fd(r.abre_em)}.`} Do ${r.vagas+1}º em diante, só entra se um titular sair.</p><div class="ctl" style="gap:10px">${eu?'<button class="btn ghost" data-a="sai">Sair da lista</button>':`<button class="btn" data-a="ent" ${aberta?'':'disabled'}>${aberta?'Entrar na lista':'Aguardando abertura'}</button>`}<button class="btn ghost" data-a="zap">Compartilhar</button>${adm?'<button class="btn sm ghost" data-a="sort">Sortear times</button><button class="btn sm ghost" data-a="cancel">Cancelar racha</button>':''}</div></section>${controlesExtra}${tit.length?'<div class="sep">Titulares</div>'+tit.map(x=>rw(x)).join(''):''}${sup.length?'<div class="sep">Suplentes</div>'+sup.map(x=>rw(x,1)).join(''):''}${sorteioHtml()}`}
 function vLista(){
  const r=S.rachas.find(x=>x.id===S.sel);
  if(!r)return '<section class="panel"><h2>Nenhum racha marcado</h2><p class="sub">O racha de segunda aparece aqui. Você também pode puxar um em outro dia.</p></section>';
@@ -170,6 +174,8 @@ const A={
  tab:async id=>{S.tab=id;if(id==='admin')await loadAdm();render()},
  saveprofile:async()=>{const nome=$('#pn').value.trim(),idade=Number($('#pi').value)||null,email=$('#pe').value.trim(),posicao=$('#pp').value;if(nome.length<2||nome.length>40)return toast('O nome deve ter entre 2 e 40 caracteres.');if(idade!==null&&(idade<10||idade>90))return toast('A idade deve estar entre 10 e 90.');if(!email||!$('#pe').validity.valid)return toast('Informe um e-mail válido.');const{error}=await sb.rpc('atualizar_meu_perfil',{p_nome:nome,p_idade:idade,p_posicao:posicao});if(error)return toast(error.message);S.me={...S.me,nome,idade,posicao};let aviso='Dados atualizados';if(email!==S.email){const{error:ee}=await sb.auth.updateUser({email});if(ee)aviso=`Perfil salvo; falha ao solicitar troca de e-mail: ${ee.message}`;else{S.email=email;aviso='Perfil salvo. Confirme a troca de e-mail pela mensagem enviada.'}}await refresh();render();toast(aviso)},
  ent:async()=>{await call('entrar_na_lista',{p_racha:S.sel,p_sessao:tok},'Nome adicionado');await loadLista();paintLista()},
+ addExtra:async()=>{const id=$('#extra-player')?.value,j=S.jogs.find(x=>x.id===id);if(!j)return toast('Escolha um jogador do grupo.');if(!confirm(`Adicionar ${j.nome} à lista? Ele ocupará uma vaga e entrará no fim da fila.`))return;const ok=await call('adicionar_jogador_extra',{p_racha:S.sel,p_jogador:id,p_sessao:tok},`${j.nome} adicionado à lista`);if(ok){await loadLista();paintLista()}},
+ removeExtra:async id=>{const j=S.lista.find(x=>x.jogador_id===id);if(!confirm(`Remover ${j?.nome||'o jogador extra'} da lista? Depois você poderá indicar outra pessoa.`))return;if(await call('remover_jogador_extra',{p_racha:S.sel,p_jogador:id,p_sessao:tok},'Jogador extra removido')){await loadLista();paintLista()}},
  sai:async()=>{if(!confirm('Tirar seu nome da lista?'))return;await call('sair_da_lista',{p_racha:S.sel,p_sessao:tok},'Você saiu da lista');await loadLista();paintLista()},
  rm:async id=>{if(!confirm('Remover este jogador da lista?'))return;await call('admin_remover_da_lista',{p_racha:S.sel,p_jogador:id},'Removido');await loadLista();paintLista()},
  sort:async()=>{await call('admin_sortear',{p_racha:S.sel},'Times sorteados');await loadLista();paintLista()},

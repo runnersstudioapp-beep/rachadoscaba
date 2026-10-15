@@ -20,6 +20,7 @@ banco/                 SQL do Supabase, em ordem
   002-primeiro-admin-e-racha.sql
   003-perfil-proprio-e-cadastro-com-nome.sql
   004-log-trocas-aparelho.sql
+  005-jogador-extra-em-racha-avulso.sql
 .vscode/               configurações do VS Code
 ```
 
@@ -39,12 +40,15 @@ banco/                 SQL do Supabase, em ordem
 ## Banco de dados
 
 - O `001-esquema.sql` **já foi aplicado** no projeto. **Não rode de novo** (dá erro "already exists").
-- Mudanças futuras: crie arquivos novos (`003-...sql`, `004-...sql`) só com a alteração
+- Mudanças futuras: crie arquivos SQL numerados em sequência, só com a alteração
   e rode-os no SQL Editor do Supabase. Mantenha-os aqui para ter o histórico.
 - Para aplicar a escolha do nome no cadastro e a edição do perfil, rode também
   `003-perfil-proprio-e-cadastro-com-nome.sql` no SQL Editor do Supabase.
 - Para os admins consultarem as trocas recentes de aparelho com identificador local
   da instalação e dados do navegador, rode também `004-log-trocas-aparelho.sql`.
+- Para permitir que cada jogador inclua uma pessoa nos rachas avulsos, rode também
+  `005-jogador-extra-em-racha-avulso.sql`. O jogador pode remover a si mesmo ou quem indicou;
+  admins podem remover qualquer inscrição.
 - Supabase: Authentication → Providers → Email → **desligar "Confirm email"**.
 - Para redefinição de senha, cadastre a URL publicada do app em Authentication → URL Configuration → Redirect URLs.
 - Recomendado: ativar a extensão `pg_cron` (Database → Extensions) e agendar a criação do racha de segunda:

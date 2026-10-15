@@ -46,6 +46,7 @@ banco/                 SQL do Supabase, em ordem
 - Para os admins consultarem as trocas recentes de aparelho com identificador local
   da instalação e dados do navegador, rode também `004-log-trocas-aparelho.sql`.
 - Supabase: Authentication → Providers → Email → **desligar "Confirm email"**.
+- Para redefinição de senha, cadastre a URL publicada do app em Authentication → URL Configuration → Redirect URLs.
 - Recomendado: ativar a extensão `pg_cron` (Database → Extensions) e agendar a criação do racha de segunda:
   `select cron.schedule('racha-semanal','0 6 * * *','select public.criar_racha_semanal()');`
 

@@ -69,6 +69,8 @@ nav button[aria-current=page]{background:linear-gradient(180deg,#6fe0ff,#1d5cff)
 const SB_URL='https://orypccfafnasydcotgrf.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yeXBjY2ZhZm5hc3lkY290Z3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MTAwOTQsImV4cCI6MjEwNzQ4NjA5NH0.e589SOFj1zY_ZsO4mFtFqK4ugQh6tCY4S6S-a1o6HIQ';
 const sb=supabase.createClient(SB_URL,SB_KEY);
+let passwordRecovery=false;
+sb.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){passwordRecovery=true;resetPasswordView()}});
 const $=s=>document.querySelector(s),TZ='America/Fortaleza',POS=['ZAG','LAT','VOL','MEI','ATA'];
 const POSH=POS.map(x=>`<option>${x}</option>`).join('');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -84,15 +86,16 @@ const tr=m=>/Invalid login/i.test(m)?'E-mail ou senha incorretos.':/already regi
 
 /* ---------- telas de acesso ---------- */
 const convForm=()=>`<label>Seu nome<input id="nm" autocomplete="name" maxlength="40" minlength="2" required></label><label>Código do convite<input id="c" autocapitalize="characters" autocomplete="off"></label><label>Idade<input id="i" type="number" inputmode="numeric" min="10" max="90"></label><label>Posição preferida<select id="pos">${POSH}</select></label>`;
-function authView(mode,msg){document.body.classList.add('auth');const c=mode==='criar';
- $('#app').innerHTML=`<section class="panel"><h2>${c?'Criar conta com convite':'Entrar'}</h2>${msg?`<p class="err" role="alert">${esc(msg)}</p>`:''}<label>E-mail<input id="e" type="email" autocomplete="email"></label><label>Senha<input id="p" type="password" autocomplete="${c?'new-password':'current-password'}"></label>${c?convForm():''}<div class="ctl" style="gap:10px"><button class="btn" data-a="${c?'signup':'signin'}">${c?'Criar conta':'Entrar'}</button><button class="btn ghost" data-a="${c?'tologin':'tosignup'}">${c?'Já tenho conta':'Tenho um convite'}</button></div></section>`}
+function authView(mode,msg,success=false){document.body.classList.add('auth');const c=mode==='criar';
+ $('#app').innerHTML=`<section class="panel"><h2>${c?'Criar conta com convite':'Entrar'}</h2>${msg?`<p class="${success?'sub':'err'}" role="${success?'status':'alert'}">${esc(msg)}</p>`:''}<label>E-mail<input id="e" type="email" autocomplete="email"></label><label>Senha<input id="p" type="password" autocomplete="${c?'new-password':'current-password'}"></label>${c?convForm():''}<div class="ctl" style="gap:10px"><button class="btn" data-a="${c?'signup':'signin'}">${c?'Criar conta':'Entrar'}</button><button class="btn ghost" data-a="${c?'tologin':'tosignup'}">${c?'Já tenho conta':'Tenho um convite'}</button>${c?'':'<button class="btn ghost" data-a="forgot">Esqueci a senha</button>'}</div></section>`}
+function resetPasswordView(msg=''){document.body.classList.add('auth');$('#app').innerHTML=`<section class="panel"><h2>Redefinir senha</h2>${msg?`<p class="err" role="alert">${esc(msg)}</p>`:''}<label>Nova senha<input id="npw" type="password" autocomplete="new-password" minlength="6" required></label><label>Confirme a nova senha<input id="cpw" type="password" autocomplete="new-password" minlength="6" required></label><button class="btn" data-a="savepassword">Salvar nova senha</button></section>`}
 function convView(msg){document.body.classList.add('auth');
  $('#app').innerHTML=`<section class="panel"><h2>Falta o convite</h2><p class="sub">Sua conta ainda não está ligada a um jogador. Informe o código que o admin te passou.</p>${msg?`<p class="err" role="alert">${esc(msg)}</p>`:''}${convForm()}<div class="ctl" style="gap:10px"><button class="btn" data-a="redeem">Vincular</button><button class="btn ghost" data-a="out">Sair</button></div></section>`}
 
 /* ---------- dados ---------- */
 async function init(){
- const{data:{session}}=await sb.auth.getSession();if(!session)return authView('entrar');S.email=session.user.email||'';
- const{data:me}=await sb.from('jogadores').select('*').eq('auth_id',session.user.id).maybeSingle();
+ const{data:{session}}=await sb.auth.getSession();if(passwordRecovery)return;if(!session)return authView('entrar');S.email=session.user.email||'';
+ const{data:me}=await sb.from('jogadores').select('*').eq('auth_id',session.user.id).maybeSingle();if(passwordRecovery)return;
  if(!me)return convView();
  if(me.banido){await sb.auth.signOut();return authView('entrar','Seu acesso está bloqueado. Fale com um admin.')}
  S.me=me;document.body.classList.remove('auth');
@@ -154,6 +157,8 @@ const invite=(n,c)=>{S.last={n,c};render()};
 /* ---------- ações ---------- */
 const A={
  tosignup:()=>authView('criar'),tologin:()=>authView('entrar'),
+ forgot:async()=>{const email=$('#e').value.trim();if(!email||!$('#e').validity.valid)return authView('entrar','Informe um e-mail válido.');const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)return authView('entrar',error.message);authView('entrar','Se esse e-mail estiver cadastrado, enviaremos um link para redefinir a senha.',true)},
+ savepassword:async()=>{const password=$('#npw').value,confirmPassword=$('#cpw').value;if(password.length<6)return resetPasswordView('A senha precisa ter pelo menos 6 caracteres.');if(password!==confirmPassword)return resetPasswordView('As senhas não coincidem.');const{error}=await sb.auth.updateUser({password});if(error)return resetPasswordView(error.message);passwordRecovery=false;await sb.auth.signOut();authView('entrar','Senha redefinida. Entre com a nova senha.',true)},
  signin:async()=>{const{error}=await sb.auth.signInWithPassword({email:$('#e').value.trim(),password:$('#p').value});if(error)return authView('entrar',tr(error.message));init()},
  signup:async()=>{if(!$('#nm').value.trim())return authView('criar','Informe seu nome.');if(!$('#c').value.trim())return authView('criar','Informe o código do convite.');
   const{data,error}=await sb.auth.signUp({email:$('#e').value.trim(),password:$('#p').value});

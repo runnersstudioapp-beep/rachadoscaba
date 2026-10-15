@@ -123,8 +123,8 @@ async function loadAdm(){
 
 /* ---------- views ---------- */
 const rw=(x,s)=>`<div class="row${s?' sup':''}${x.jogador_id===S.me.id?' me':''}"><span class="num">${x.vaga}</span><span><span class="name">${esc(x.nome)}</span><span class="pos">${x.posicao||''}</span>${x.garantida?' <span class="sub">puxou o racha</span>':''}</span>${st(x.estrelas)}<span class="rest"><span class="sub">Entrou às</span><span class="time">${ft(x.entrou_em)}${S.me.is_admin?`<button class="x" aria-label="Remover ${esc(x.nome)}" data-a="rm" data-id="${x.jogador_id}">×</button>`:''}</span></span></div>`;
-function sorteioHtml(){const s=S.sorteio;if(!s)return '';const nm=id=>esc(S.jogs.find(j=>j.id===id)?.nome||'?');
- const bx=(t,a,k,n)=>`<div class="team ${k}"><h2>${n} · ${Number(t).toFixed(1)}</h2>${a.map(i=>`<div>${nm(i)}</div>`).join('')}</div>`;
+function sorteioHtml(){const s=S.sorteio;if(!s)return '';const jogadores=new Map(S.jogs.map(j=>[j.id,j])),nm=id=>esc(jogadores.get(id)?.nome||'?');
+ const bx=(t,a,k,n)=>`<div class="team ${k}"><h2>${n} · ${Number(t).toFixed(1)}</h2>${[...a].sort((x,y)=>Number(jogadores.get(y)?.estrelas||0)-Number(jogadores.get(x)?.estrelas||0)).map(i=>`<div>${nm(i)}</div>`).join('')}</div>`;
  return `<div class="sep">Times sorteados</div><div class="teams">${bx(s.soma_a,s.time_a,'','Time A')}${bx(s.soma_b,s.time_b,'b','Time B')}</div>`}
 function bLista(r){
  const eu=S.lista.find(x=>x.jogador_id===S.me.id),aberta=Date.now()>=D(r.abre_em).getTime(),tit=S.lista.filter(x=>x.titular),sup=S.lista.filter(x=>!x.titular),adm=S.me.is_admin;

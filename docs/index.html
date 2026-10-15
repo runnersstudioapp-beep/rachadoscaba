@@ -67,7 +67,7 @@ const $=s=>document.querySelector(s),TZ='America/Fortaleza',POS=['ZAG','LAT','VO
 const POSH=POS.map(x=>`<option>${x}</option>`).join('');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tok=(()=>{try{let t=localStorage.getItem('racha_tok');if(!t){t=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random();localStorage.setItem('racha_tok',t)}return t}catch(e){return 'tmp-'+Math.random()}})();
-const S={tab:'lista',rachas:[],sel:null,lista:[],sorteio:null,jogs:[],adm:null,last:null,me:null,email:''};
+const S={tab:'lista',rachas:[],sel:null,lista:[],sorteio:null,jogs:[],adm:null,sessLogs:[],sessLogError:'',last:null,me:null,email:''};
 const D=s=>new Date(String(s).replace(/(\.\d{3})\d+/,'$1'));
 const fd=s=>new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(D(s));
 const ft=s=>new Intl.DateTimeFormat('pt-BR',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3,hour12:false}).format(D(s)).replace(',','.');
@@ -90,7 +90,7 @@ async function init(){
  if(!me)return convView();
  if(me.banido){await sb.auth.signOut();return authView('entrar','Seu acesso está bloqueado. Fale com um admin.')}
  S.me=me;document.body.classList.remove('auth');
- await sb.rpc('registrar_sessao',{p_token:tok});
+ await sb.rpc('registrar_sessao',{p_token:tok,p_user_agent:navigator.userAgent.slice(0,500)});
  await refresh();render();
 }
 async function refresh(){
@@ -106,8 +106,8 @@ async function loadLista(){
  S.lista=l.data||[];S.sorteio=s.data?.[0]||null;
 }
 async function loadAdm(){
- const[j,n]=await Promise.all([sb.from('jogadores').select('*').order('nome'),sb.from('notas').select('jogador_id,valor').eq('admin_id',S.me.id)]);
- S.adm={jogs:j.data||[],notas:Object.fromEntries((n.data||[]).map(x=>[x.jogador_id,Number(x.valor)]))};
+ const[j,n,l]=await Promise.all([sb.from('jogadores').select('*').order('nome'),sb.from('notas').select('jogador_id,valor').eq('admin_id',S.me.id),sb.from('sessoes_log').select('id,jogador_id,em,instalacao_id,user_agent,jogadores(nome)').order('em',{ascending:false}).limit(100)]);
+ S.adm={jogs:j.data||[],notas:Object.fromEntries((n.data||[]).map(x=>[x.jogador_id,Number(x.valor)]))};S.sessLogs=l.data||[];S.sessLogError=l.error?'Não foi possível carregar o histórico. Rode a migração 004 no banco.':'';
 }
 
 /* ---------- views ---------- */
@@ -130,8 +130,9 @@ function pvTxt(){const g=inicioPuxar();if(!g)return '';if(g<=new Date())return '
 const vPuxar=()=>`<section class="panel"><h2>Puxar um racha</h2><p class="sub">A lista abre às 12h do dia anterior. Se você puxar depois disso, ela abre na hora e sua vaga já fica garantida.</p><div class="ctl" style="gap:10px"><input id="pd" type="date" data-ch="pv" aria-label="Dia"><input id="ph" type="time" value="18:30" data-ch="pv" aria-label="Hora"><button class="btn" data-a="puxar">Puxar racha</button></div><p id="pv" class="sub" aria-live="polite"></p></section>`;
 function vAdmin(){
  if(!S.adm)return '<p class="sub">Carregando…</p>';
+ const logs=S.sessLogError?`<p class="err">${esc(S.sessLogError)}</p>`:S.sessLogs.length?S.sessLogs.map(x=>`<div class="row"><span class="sub">${ft(x.em)}</span><span><span class="name">${esc(x.jogadores?.nome||'Jogador removido')}</span><span class="pos">Instalação …${esc((x.instalacao_id||'').slice(-8))}</span><span class="sub">${esc(x.user_agent||'Dados da instalação não disponíveis')}</span></span></div>`).join(''):'<p class="sub">Nenhuma troca registrada.</p>';
  const L=S.last?`<section class="panel"><h2>Convite de ${esc(S.last.n)}</h2><p>Código: <b class="time" style="font-size:20px">${esc(S.last.c)}</b></p><button class="btn sm" data-a="cp">Enviar no WhatsApp</button></section>`:'';
- return L+`<section class="panel"><h2>Novo jogador</h2><div class="ctl" style="gap:10px"><input id="nn" placeholder="Nome" maxlength="40" aria-label="Nome"><select id="np" aria-label="Posição">${POSH}</select><button class="btn sm" data-a="newj">Criar convite</button></div></section>`+S.adm.jogs.map(j=>{
+  return L+`<section class="panel"><h2>Novo jogador</h2><div class="ctl" style="gap:10px"><input id="nn" placeholder="Nome" maxlength="40" aria-label="Nome"><select id="np" aria-label="Posição">${POSH}</select><button class="btn sm" data-a="newj">Criar convite</button></div></section><section class="panel"><h2>Trocas de aparelho</h2><p class="sub">Até 100 acessos recentes que substituíram uma sessão ativa. O identificador é local à instalação e pode mudar se os dados do navegador forem apagados.</p>${logs}</section>`+S.adm.jogs.map(j=>{
   const m=S.adm.notas[j.id]??Math.round(j.estrelas*2)/2,eu=j.id===S.me.id;
   return `<div class="row${j.banido?' off':''}"><span></span><span><span class="name">${esc(j.nome)}</span><span class="pos">${j.posicao||'—'}</span>${j.is_admin?' <span class="sub">admin</span>':''}${j.banido?' <span class="sub">banido</span>':''}</span>${st(j.estrelas)}<span class="rest">${j.auth_id?'':`<span class="sub">Convite: <b>${esc(j.convite)}</b></span>`}<span class="ctl"><button class="step" data-a="nota" data-id="${j.id}" data-v="${Math.max(.5,m-.5)}" aria-label="Diminuir minha nota de ${esc(j.nome)}">−</button><span class="sub">minha nota ${m.toFixed(1)}</span><button class="step" data-a="nota" data-id="${j.id}" data-v="${Math.min(5,m+.5)}" aria-label="Aumentar minha nota de ${esc(j.nome)}">+</button></span>${eu?'':`<span class="ctl"><button class="btn sm ghost" data-a="ban" data-id="${j.id}" data-v="${!j.banido}">${j.banido?'Desbanir':'Banir'}</button><button class="btn sm ghost" data-a="adm" data-id="${j.id}" data-v="${!j.is_admin}">${j.is_admin?'Tirar admin':'Admin'}</button><button class="btn sm ghost" data-a="conv" data-id="${j.id}">Novo convite</button></span>`}</span></div>`}).join('')}
 function render(){

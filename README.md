@@ -22,6 +22,7 @@ banco/                 SQL do Supabase, em ordem
   004-log-trocas-aparelho.sql
   005-jogador-extra-em-racha-avulso.sql
   006-velocidade-sorteio-atividade.sql
+  007-excluir-jogador.sql
 .vscode/               configurações do VS Code
 ```
 
@@ -52,6 +53,8 @@ banco/                 SQL do Supabase, em ordem
   admins podem remover qualquer inscrição.
 - Para velocidade admin, sorteio equilibrado também por velocidade e histórico de eventos da lista, rode
   `006-velocidade-sorteio-atividade.sql` no SQL Editor do Supabase.
+- Para excluir jogadores definitivamente ao removê-los da gestão, rode
+  `007-excluir-jogador.sql` no SQL Editor do Supabase.
 - Supabase: Authentication → Providers → Email → **desligar "Confirm email"**.
 - Para redefinição de senha, cadastre a URL publicada do app em Authentication → URL Configuration → Redirect URLs.
 - Recomendado: ativar a extensão `pg_cron` (Database → Extensions) e agendar a criação do racha de segunda:

@@ -21,6 +21,7 @@ banco/                 SQL do Supabase, em ordem
   003-perfil-proprio-e-cadastro-com-nome.sql
   004-log-trocas-aparelho.sql
   005-jogador-extra-em-racha-avulso.sql
+  006-velocidade-sorteio-atividade.sql
 .vscode/               configurações do VS Code
 ```
 
@@ -49,6 +50,8 @@ banco/                 SQL do Supabase, em ordem
 - Para permitir que cada jogador inclua uma pessoa nos rachas avulsos, rode também
   `005-jogador-extra-em-racha-avulso.sql`. O jogador pode remover a si mesmo ou quem indicou;
   admins podem remover qualquer inscrição.
+- Para velocidade admin, sorteio equilibrado também por velocidade e histórico de eventos da lista, rode
+  `006-velocidade-sorteio-atividade.sql` no SQL Editor do Supabase.
 - Supabase: Authentication → Providers → Email → **desligar "Confirm email"**.
 - Para redefinição de senha, cadastre a URL publicada do app em Authentication → URL Configuration → Redirect URLs.
 - Recomendado: ativar a extensão `pg_cron` (Database → Extensions) e agendar a criação do racha de segunda:
@@ -61,7 +64,7 @@ banco/                 SQL do Supabase, em ordem
 - Qualquer jogador pode puxar um racha em outro dia (máx. 2 abertos por vez). A lista abre às 12h do dia anterior;
   se puxar depois disso, abre na hora e a vaga de quem puxou fica garantida.
 - Cadastro só por convite dos admins; uma sessão ativa por jogador (entrar em outro aparelho derruba o anterior).
-- Ranking por estrelas (média das notas dos admins). Sorteio testa todas as divisões e escolhe a mais equilibrada.
+- Ranking por estrelas (média das notas dos admins). Admins definem velocidade 1 (lento), 2 (regular) ou 3 (rápido); o sorteio prioriza habilidade, rápidos, lentos e soma de velocidade, nessa ordem.
 - Ninguém coloca o nome de terceiros: a entrada na lista só existe para o próprio usuário logado.
 
 ## Segurança
@@ -71,5 +74,5 @@ banco/                 SQL do Supabase, em ordem
 
 ## Próximos passos
 
-Botão do admin para adicionar nome manualmente na lista, tela de trocas de aparelho,
-súmula (gols e assistências), card do jogador em imagem, músicas livres de direitos e o mini jogo.
+Botão do admin para adicionar nome manualmente na lista, súmula (gols e assistências),
+card do jogador em imagem e o mini jogo.

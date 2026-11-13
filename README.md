@@ -23,6 +23,7 @@ banco/                 SQL do Supabase, em ordem
   005-jogador-extra-em-racha-avulso.sql
   006-velocidade-sorteio-atividade.sql
   007-excluir-jogador.sql
+  008-admin-master-avaliacoes.sql
 .vscode/               configurações do VS Code
 ```
 
@@ -55,6 +56,9 @@ banco/                 SQL do Supabase, em ordem
   `006-velocidade-sorteio-atividade.sql` no SQL Editor do Supabase.
 - Para excluir jogadores definitivamente ao removê-los da gestão, rode
   `007-excluir-jogador.sql` no SQL Editor do Supabase.
+- Para restringir avaliações ao admin master, rode `008-admin-master-avaliacoes.sql`.
+  O arquivo define a conta escolhida no final. Admins comuns mantêm as demais funções
+  administrativas, mas não podem definir estrelas ou velocidade.
 - Supabase: Authentication → Providers → Email → **desligar "Confirm email"**.
 - Para redefinição de senha, cadastre a URL publicada do app em Authentication → URL Configuration → Redirect URLs.
 - Recomendado: ativar a extensão `pg_cron` (Database → Extensions) e agendar a criação do racha de segunda:
@@ -67,7 +71,9 @@ banco/                 SQL do Supabase, em ordem
 - Qualquer jogador pode puxar um racha em outro dia (máx. 2 abertos por vez). A lista abre às 12h do dia anterior;
   se puxar depois disso, abre na hora e a vaga de quem puxou fica garantida.
 - Cadastro só por convite dos admins; uma sessão ativa por jogador (entrar em outro aparelho derruba o anterior).
-- Ranking por estrelas (média das notas dos admins). Admins definem velocidade 1 (lento), 2 (regular) ou 3 (rápido); o sorteio prioriza habilidade, rápidos, lentos e soma de velocidade, nessa ordem.
+- Ranking por estrelas, definido pelo admin master e visível para todos. A velocidade
+  (1 lento, 2 regular, 3 rápido) é privada e só pode ser consultada/aplicada pelo admin
+  master; o sorteio prioriza habilidade, rápidos, lentos e soma de velocidade, nessa ordem.
 - Ninguém coloca o nome de terceiros: a entrada na lista só existe para o próprio usuário logado.
 
 ## Segurança

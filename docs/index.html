@@ -117,8 +117,8 @@ async function refresh(){
 }
 async function loadLista(){
  if(!S.sel){S.lista=[];S.sorteio=null;S.extraAdicionado=false;S.extraError='';return}
- const[l,s,e]=await Promise.all([sb.from('lista_racha').select('*').eq('racha_id',S.sel).order('vaga'),sb.from('sorteios').select('*').eq('racha_id',S.sel).order('criado_em',{ascending:false}).limit(1),sb.from('inscricoes').select('jogador_id').eq('racha_id',S.sel).eq('adicionado_por',S.me.id).is('saiu_em',null).limit(1).maybeSingle()]);
- S.lista=l.data||[];S.sorteio=s.data?.[0]||null;S.extraAdicionado=!!e.data;S.extraError=e.error?'Não foi possível verificar a inclusão extra. Rode a migração 005 no banco.':'';
+ const[l,s,e]=await Promise.all([sb.from('lista_racha').select('*').eq('racha_id',S.sel).order('vaga'),S.me.is_admin?sb.from('sorteios').select('*').eq('racha_id',S.sel).order('criado_em',{ascending:false}).limit(1):Promise.resolve({data:[]}),sb.from('inscricoes').select('jogador_id').eq('racha_id',S.sel).eq('adicionado_por',S.me.id).is('saiu_em',null).limit(1).maybeSingle()]);
+ S.lista=l.data||[];S.sorteio=S.me.is_admin?(s.data?.[0]||null):null;S.extraAdicionado=!!e.data;S.extraError=e.error?'Não foi possível verificar a inclusão extra. Rode a migração 005 no banco.':'';
 }
 async function loadAdm(){
  const[j,n,l,a,v]=await Promise.all([sb.from('jogadores').select('id,auth_id,nome,idade,posicao,is_admin,is_admin_master,banido,estrelas,convite,criado_em').order('nome'),S.me.is_admin_master?sb.from('notas').select('jogador_id,valor').eq('admin_id',S.me.id):Promise.resolve({data:[]}),sb.from('sessoes_log').select('id,jogador_id,em,instalacao_id,user_agent,jogadores(nome)').order('em',{ascending:false}).limit(100),sb.from('eventos_lista').select('*').order('em',{ascending:false}).limit(100),S.me.is_admin_master?sb.rpc('admin_listar_velocidades'):Promise.resolve({data:[]})]);

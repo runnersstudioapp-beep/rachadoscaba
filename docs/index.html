@@ -39,6 +39,7 @@ label{display:block;margin:10px 0;font-weight:600;color:#bcd6ff}label input,labe
 .row{display:grid;grid-template-columns:32px 1fr auto;gap:4px 10px;align-items:center;padding:9px 18px 9px 12px;margin:4px 0;background:linear-gradient(90deg,rgba(29,92,255,.3),rgba(12,31,69,.6));clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);border-left:3px solid var(--cyan)}
 .row.sup{border-left-color:var(--dim);background:linear-gradient(90deg,rgba(60,75,110,.35),rgba(12,20,40,.6))}.row.me{border-left-color:var(--gold)}.row.off{opacity:.5}
 .row .rest{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.row > .ctl{grid-column:1/-1;flex-wrap:nowrap}
 .session-entry{min-width:0;padding:10px 12px;margin:6px 0;background:rgba(12,31,69,.72);border-left:3px solid var(--cyan)}
 .session-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .session-date{font:600 13px ui-monospace,Menlo,monospace;color:#bcd6ff;white-space:nowrap}
@@ -139,7 +140,7 @@ function vLista(){
  const r=S.rachas.find(x=>x.id===S.sel);
  if(!r)return '<section class="panel"><h2>Nenhum racha marcado</h2><p class="sub">O racha de segunda aparece aqui. Você também pode puxar um em outro dia.</p></section>';
  return `<section class="panel"><h2>Racha</h2><select id="rs" data-ch="rs" aria-label="Escolher racha">${S.rachas.map(x=>`<option value="${x.id}" ${x.id===S.sel?'selected':''}>${fd(x.inicio)}</option>`).join('')}</select></section><div id="lb">${bLista(r)}</div>`}
-const vJogs=()=>`<section class="panel"><h2>Jogadores</h2><p class="sub">Ranking por estrelas, definido pelos admins.</p></section>`+S.jogs.map((q,i)=>`<div class="row${q.id===S.me.id?' me':''}"><span class="num">${i+1}</span><span><span class="name">${esc(q.nome)}</span><span class="pos">${q.posicao||'—'}</span></span>${st(q.estrelas)}</div>`).join('');
+const vJogs=()=>`<section class="panel"><h2>Jogadores</h2><p class="sub">Ranking por estrelas, definido pelo admin master.</p></section>`+S.jogs.map((q,i)=>`<div class="row${q.id===S.me.id?' me':''}"><span class="num">${i+1}</span><span><span class="name">${esc(q.nome)}</span><span class="pos">${q.posicao||'—'}</span></span>${st(q.estrelas)}</div>`).join('');
 const vPerfil=()=>`<section class="panel"><h2>Meus dados</h2><p class="sub">Atualize as informações da sua conta.</p><label>Nome<input id="pn" value="${esc(S.me.nome)}" maxlength="40" minlength="2" autocomplete="name"></label><label>Idade<input id="pi" type="number" inputmode="numeric" min="10" max="90" value="${S.me.idade??''}"></label><label>E-mail<input id="pe" type="email" autocomplete="email" value="${esc(S.email)}"></label><label>Posição preferida<select id="pp">${POS.map(x=>`<option ${x===S.me.posicao?'selected':''}>${x}</option>`).join('')}</select></label><button class="btn" data-a="saveprofile">Salvar dados</button><p class="sub">A troca de e-mail pode exigir confirmação enviada ao endereço novo.</p></section>`;
 function inicioPuxar(){const d=$('#pd')?.value,h=$('#ph')?.value;return d&&h?new Date(`${d}T${h}:00-03:00`):null}
 function pvTxt(){const g=inicioPuxar();if(!g)return '';if(g<=new Date())return 'Esse horário já passou.';const l=new Date(g-3*36e5),p=new Date(Date.UTC(l.getUTCFullYear(),l.getUTCMonth(),l.getUTCDate()-1,15));

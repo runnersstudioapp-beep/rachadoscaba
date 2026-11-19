@@ -25,6 +25,7 @@ banco/                 SQL do Supabase, em ordem
   007-excluir-jogador.sql
   008-admin-master-avaliacoes.sql
   009-sorteios-apenas-admin.sql
+  010-estrelas-apenas-admin-master.sql
 .vscode/               configurações do VS Code
 ```
 
@@ -59,6 +60,8 @@ banco/                 SQL do Supabase, em ordem
   `007-excluir-jogador.sql` no SQL Editor do Supabase.
 - Para que apenas admins consultem e realizem sorteios, rode
   `009-sorteios-apenas-admin.sql` no SQL Editor do Supabase.
+- Para que as estrelas usem somente a avaliação do admin master e corrigir valores antigos,
+  rode `010-estrelas-apenas-admin-master.sql` no SQL Editor do Supabase.
 - Para restringir avaliações ao admin master, rode `008-admin-master-avaliacoes.sql`.
   O arquivo define a conta escolhida no final. Admins comuns mantêm as demais funções
   administrativas, mas não podem definir estrelas ou velocidade.

@@ -24,7 +24,7 @@ begin
   insert into public.notas (jogador_id, admin_id, valor) values (p_jogador, v_admin, p_valor)
   on conflict (jogador_id, admin_id) do update set valor = excluded.valor, atualizado_em = now();
   update public.jogadores
-     set estrelas = (select round(avg(valor), 2) from public.notas where jogador_id = p_jogador)
+     set estrelas = p_valor
    where id = p_jogador;
   if not found then raise exception 'Jogador nao encontrado.'; end if;
 end $$;
